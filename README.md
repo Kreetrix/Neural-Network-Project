@@ -62,7 +62,7 @@ While U-Nets often produce "sepia" or brownish results because they minimize ave
 
 ---
 
-## ⚖️ Model Evaluation & Testing
+##  Model Evaluation & Testing
 
 To prove the effectiveness of the GAN architecture, the `tester.ipynb` notebook pits the two models against each other.
 
