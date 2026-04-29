@@ -33,17 +33,25 @@ pip install -r requirements.txt
 
 ##  Dataset & Preprocessing
 
-The **Large-U-Net Model** uses the official **COCO 2017** dataset (`val2017` and `unlabeled2017` splits) and employs a hyper-fast multi-threaded preprocessing script to optimize training.
+1. **Download the Data:**
+   Go to the official [COCO Dataset website](https://cocodataset.org/#download) and download the following files:
+   * `2017 Val images` (1GB)
+   * `2017 Unlabeled images` (19GB) - *Optional, but recommended for full training.*
 
-1. **Download:** Obtain the `val2017` and `unlabeled2017` images from the [official COCO website](https://cocodataset.org/#download).
-2. **Initial Folder Structure:** Place the raw folders inside a `coco_data/` directory in the root of your project:
+2. **Folder Structure:**
+   Extract the downloaded `.zip` files and place them inside a `coco_data` folder in the root of this project. Your directory should look exactly like this:
+
    ```text
-   Neural-Network-Project/
-   └── coco_data/
-       ├── val2017/
-       └── unlabeled2017/
-   ```
-3. **Hyper-Speed Resizing (`Large-U-Net.ipynb`):** The data pipeline automatically converts these images to RGB, resizes them to 128x128 using LANCZOS resampling, and compresses them. The processed images are saved to `coco_data_128/` for lightning-fast GPU loading.
+   your_project_folder/
+   │
+   ├── coco_data/
+   │   ├── val2017/          <-- Put the 5,000 val images here
+   │   └── unlabeled2017/    <-- Put the 123,000 unlabeled images here
+   │
+   ├── Large-U-Net.ipynb
+   ├── tester.py
+   ├── resize_dataset.py
+   └── requirements.txt
 
 ---
 
