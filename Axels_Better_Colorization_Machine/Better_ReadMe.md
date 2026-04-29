@@ -24,3 +24,4 @@ To train or test this model, you need the **COCO 2017 Dataset**.
 
 3. **install requirments**
    `pip install -r requirements.txt`
+   `python resize_dataset.py`
