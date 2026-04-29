@@ -1,0 +1,17 @@
+# Standard PyTorch
+torch
+torchvision
+
+# --- Hardware Acceleration ---
+# Microsoft's hardware bridge for AMD GPUs on Windows.
+# NOTE: If you have an AMD GPU and are on Windows, keep this to leverage DirectML. 
+# If you are using an NVIDIA GPU or a different OS, delete this line and install standard PyTorch with CUDA instead.
+torch-directml
+
+# --- Image Processing & Math ---
+numpy
+Pillow
+scikit-image
+
+# --- Visualization ---
+matplotlib

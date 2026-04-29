@@ -20,3 +20,17 @@ models/
 data/
 logs/
 checkpoints/
+
+# Ignore all dataset images under any coco_data directory
+**/coco_data/**/*.jpg
+**/coco_data/**/*.jpeg
+**/coco_data/**/*.png
+**/coco_data/**/*.webp
+**/coco_data/**/*.bmp
+**/coco_data/**/*.gif
+**/coco_data_128/**/*.jpg
+**/coco_data_128/**/*.jpeg
+**/coco_data_128/**/*.png
+**/coco_data_128/**/*.webp
+**/coco_data_128/**/*.bmp
+**/coco_data_128/**/*.gif
