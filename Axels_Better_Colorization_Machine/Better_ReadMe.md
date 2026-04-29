@@ -19,4 +19,8 @@ To train or test this model, you need the **COCO 2017 Dataset**.
    │
    ├── colorizer_training.ipynb
    ├── tester.py
+   ├── resize_dataset.py
    └── requirements.txt
+
+3. **install requirments**
+   `pip install -r requirements.txt`

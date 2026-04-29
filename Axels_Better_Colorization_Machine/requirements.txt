@@ -2,8 +2,10 @@
 torch
 torchvision
 
-# Microsoft's hardware bridge for AMD GPUs on Windows
-#If you have an AMD GPU and are on Windows, you can install torch-directml to leverage DirectML for acceleration. If you're on a different platform or don't have an AMD GPU, you can skip this.
+# --- Hardware Acceleration ---
+# Microsoft's hardware bridge for AMD GPUs on Windows.
+# NOTE: If you have an AMD GPU and are on Windows, keep this to leverage DirectML. 
+# If you are using an NVIDIA GPU or a different OS, delete this line and install standard PyTorch with CUDA instead.
 torch-directml
 
 # --- Image Processing & Math ---
