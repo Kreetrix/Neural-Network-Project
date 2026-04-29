@@ -1,9 +1,22 @@
-# --- Image Processing & Math ---
-numpy
-Pillow
-scikit-image
+# Core Machine Learning & Hardware Acceleration
+torch==2.4.1
+torchvision==0.19.1
+torch-directml==0.2.5.dev240914
+numpy==2.0.1
 
-# --- Visualization & Utilities ---
-matplotlib
-tqdm
-jupyter
+# Image Processing & Science
+Pillow==11.1.0
+scikit-image==0.25.2
+scipy==1.15.3
+matplotlib==3.10.9
+
+# Visualization & Progress UI
+tqdm==4.67.3
+ipywidgets==8.1.8
+
+# Development & Notebook Environment
+ipykernel==7.2.0
+jupyter==1.1.1
+jupyterlab==4.5.6
+PyYAML==6.0.3
+requests==2.33.1
