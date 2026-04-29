@@ -59,7 +59,7 @@ device = torch.device("cpu")
 model = UNet().to(device)
 print("4. Empty brain created on CPU.")
 
-save_path = 'safe_test_brain.pth'
+save_path = 'best_colorizer.pth'
 if os.path.exists(save_path):
     print("5. Found the saved brain file. Attempting to load...")
     checkpoint = torch.load(save_path, map_location='cpu')
@@ -116,4 +116,4 @@ def instant_colorize_to_file(image_path, output_path="colorized_output.jpg"):
 
 # --- 4. RUN ---
 if __name__ == '__main__':
-    instant_colorize_to_file("Example.jpg", "Example_colorized.jpg")
+    instant_colorize_to_file("Amir.jpg", "Amir_colorized.jpg")
