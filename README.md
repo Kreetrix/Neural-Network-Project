@@ -67,7 +67,11 @@ While U-Nets often produce "sepia" or brownish results because they minimize ave
 - **The Generator** tries to create a realistic color image.
 - **The Discriminator** acts as a critic, learning to distinguish between "fake" colorized images and "real" ground-truth photos.
 - **Result:** This adversarial battle forces the model to produce more vibrant and diverse colors.
-
+### 3. The Pix2Pix Architecture (Our Custom GAN)
+Pix2Pix is the specific architecture we built by combining the U-Net Generator and the cGAN framework. Rather than a standard critic, it introduces a specialized **PatchGAN** and a dual-loss mathematical anchor.
+- **The PatchGAN Critic:** Instead of judging the entire image at once, the Discriminator breaks the image down into smaller patches (e.g., 70x70 pixels) to judge local texture and realism, making it highly efficient.
+- **The L1 Anchor:** Alongside the adversarial GAN game, the Generator is heavily penalized for straying too far from the exact colors of the ground-truth reference photo (L1 Loss).
+- **Result:** The ultimate balance. The GAN forces vibrant, realistic textures, while the heavy L1 anchor prevents the AI from hallucinating chaotic neon colors.
 ---
 
 ##  Model Evaluation & Testing
