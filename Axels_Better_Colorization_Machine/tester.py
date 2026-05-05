@@ -11,7 +11,7 @@ from skimage.color import rgb2lab, lab2rgb
 print("1. Imports finished successfully.")
 
 # ==========================================
-# ARCHITECTURE 1: STANDARD U-NET (Early Stopping)
+# ARCHITECTURE 1: STANDARD U-NET 
 # ==========================================
 class DoubleConv(nn.Module):
     def __init__(self, in_channels, out_channels):
@@ -47,7 +47,6 @@ class UNet(nn.Module):
         u2 = torch.cat([self.up2(u1), x2], dim=1); u2 = self.up_conv2(u2)
         u3 = torch.cat([self.up3(u2), x1], dim=1); u3 = self.up_conv3(u3)
         return torch.tanh(self.out_conv(u3))
-
 
 # ==========================================
 # ARCHITECTURE 2: GAN GENERATOR
@@ -90,51 +89,66 @@ class GAN_Generator(nn.Module):
 # SETUP AND LOAD MODELS
 # ==========================================
 device = torch.device("cpu")
-print("2. Initializing models on CPU...")
+print("2. Initializing 3 models on CPU...")
 
-unet_model = UNet().to(device)
-gan_model = GAN_Generator().to(device)
-unet_loss = "N/A"
+# INITIALIZE ALL THREE MODELS
+unet_base = UNet().to(device)           # Model 1: Standard U-Net (L1 Loss)
+gan_custom = GAN_Generator().to(device) # Model 2: Custom GAN Architecture
+gan_unet = UNet().to(device)            # Model 3: New U-Net GAN Architecture
 
-# Load U-Net
-unet_path = 'best_colorizer.pth'
-if os.path.exists(unet_path):
-    checkpoint = torch.load(unet_path, map_location='cpu')
+loss_unet_base = "N/A"
+loss_gan_custom = "N/A"
+loss_gan_unet = "N/A"
+
+# --- Load Model 1: Standard U-Net ---
+path_unet_base = 'best_colorizer.pth'
+if os.path.exists(path_unet_base):
+    checkpoint = torch.load(path_unet_base, map_location='cpu', weights_only=False)
     if isinstance(checkpoint, dict) and 'model_state' in checkpoint:
-        unet_model.load_state_dict(checkpoint['model_state'])
-        unet_loss = f"{checkpoint['best_loss']:.4f}"
+        unet_base.load_state_dict(checkpoint['model_state'])
+        loss_unet_base = f"{checkpoint['best_loss']:.4f}"
     else:
-        unet_model.load_state_dict(checkpoint)
-    print(f"✅ U-Net loaded. Best Val Loss: {unet_loss}")
+        unet_base.load_state_dict(checkpoint)
+    print(f"✅ U-Net Base loaded. Best Val Loss: {loss_unet_base}")
 else:
-    print(f"❌ Error: {unet_path} not found.")
+    print(f"❌ Error: {path_unet_base} not found.")
 
-# Load GAN
-gan_path = 'generator_lab.pth'
-gan_loss = "N/A"
-
-if os.path.exists(gan_path):
-    checkpoint = torch.load(gan_path, map_location='cpu')
+# --- Load Model 2: Custom GAN Generator ---
+path_gan_custom = 'generator_lab.pth'
+if os.path.exists(path_gan_custom):
+    checkpoint = torch.load(path_gan_custom, map_location='cpu', weights_only=False)
     if isinstance(checkpoint, dict) and 'model_state' in checkpoint:
-        gan_model.load_state_dict(checkpoint['model_state'])
-        if 'val_loss' in checkpoint:
-            gan_loss = f"{checkpoint['val_loss']:.4f}"
-        elif 'best_loss' in checkpoint:
-            gan_loss = f"{checkpoint['best_loss']:.4f}"
-        print(f"✅ GAN Generator loaded. Val Loss: {gan_loss}")
+        gan_custom.load_state_dict(checkpoint['model_state'])
+        if 'val_loss' in checkpoint: loss_gan_custom = f"{checkpoint['val_loss']:.4f}"
     else:
-        gan_model.load_state_dict(checkpoint)
-        print("✅ GAN Generator loaded. (Old save format - No Val Loss)")
+        gan_custom.load_state_dict(checkpoint)
+    print(f"✅ Custom GAN loaded. Val Loss: {loss_gan_custom}")
 else:
-    print(f"❌ Error: {gan_path} not found.")
+    print(f"❌ Error: {path_gan_custom} not found.")
 
-unet_model.eval()
-gan_model.eval()
+# --- Load Model 3: New U-Net GAN ---
+# EDIT THIS PATH IF YOUR NEW GAN SAVE FILE HAS A DIFFERENT NAME
+path_gan_unet = 'colorizer_GAN_epoch_50.pth' 
+if os.path.exists(path_gan_unet):
+    checkpoint = torch.load(path_gan_unet, map_location='cpu', weights_only=False)
+    if isinstance(checkpoint, dict) and 'model_state' in checkpoint:
+        gan_unet.load_state_dict(checkpoint['model_state'])
+        if 'val_loss' in checkpoint: loss_gan_unet = f"{checkpoint['val_loss']:.4f}"
+    else:
+        gan_unet.load_state_dict(checkpoint)
+    print(f"✅ U-Net GAN loaded. Val Loss: {loss_gan_unet}")
+else:
+    print(f"❌ Error: {path_gan_unet} not found.")
+
+# Set all to evaluation mode
+unet_base.eval()
+gan_custom.eval()
+gan_unet.eval()
 
 # ==========================================
 # COMPARISON INFERENCE FUNCTION
 # ==========================================
-def compare_models(image_path, output_path="model_comparison.jpg"):
+def compare_models(image_path, output_path="model_comparison_3way.jpg"):
     print(f"\n--- Processing {image_path} ---")
     if not os.path.exists(image_path):
         print(f"❌ Image not found: {image_path}")
@@ -151,10 +165,11 @@ def compare_models(image_path, output_path="model_comparison.jpg"):
     L_channel = img_lab_tensor[[0], ...] / 50.0 - 1.0
     L_input = L_channel.unsqueeze(0).to(device)
 
-    # Run Inference
+    # Run Inference on all 3
     with torch.no_grad():
-        ab_unet = unet_model(L_input)
-        ab_gan = gan_model(L_input)
+        ab_unet_base = unet_base(L_input)
+        ab_gan_custom = gan_custom(L_input)
+        ab_gan_unet = gan_unet(L_input)
 
     # Helper function to convert tensors to RGB
     def to_rgb(L_tensor, ab_tensor):
@@ -164,8 +179,9 @@ def compare_models(image_path, output_path="model_comparison.jpg"):
         return np.clip(lab2rgb(lab), 0, 1)
 
     print("🎨 Reconstructing colors...")
-    rgb_unet = to_rgb(L_input, ab_unet)
-    rgb_gan = to_rgb(L_input, ab_gan)
+    rgb_unet_base = to_rgb(L_input, ab_unet_base)
+    rgb_gan_custom = to_rgb(L_input, ab_gan_custom)
+    rgb_gan_unet = to_rgb(L_input, ab_gan_unet)
     
     # Create Grayscale version for reference
     L_only_lab = torch.cat([
@@ -175,26 +191,26 @@ def compare_models(image_path, output_path="model_comparison.jpg"):
     rgb_gray = np.clip(lab2rgb(L_only_lab), 0, 1)
 
     # ==========================================
-    # VISUALIZATION
+    # VISUALIZATION (1 Row, 4 Columns)
     # ==========================================
-    print("📸 Generating comparison plot...")
+    print("📸 Generating 4-panel comparison plot...")
     
-    fig, axes = plt.subplots(1, 4, figsize=(20, 5)) 
+    fig, axes = plt.subplots(1, 4, figsize=(25, 5)) 
     
     axes[0].imshow(img_np)
-    axes[0].set_title("Original (Ground Truth)")
+    axes[0].set_title("Original\n(Ground Truth)")
     axes[0].axis('off')
 
-    axes[1].imshow(rgb_gray)
-    axes[1].set_title("Input (Grayscale)")
+    axes[1].imshow(rgb_unet_base)
+    axes[1].set_title(f"Model 1: U-Net Base\nLoss: {loss_unet_base}")
     axes[1].axis('off')
 
-    axes[2].imshow(rgb_unet)
-    axes[2].set_title(f"Standard U-Net\nVal Loss: {unet_loss}")
+    axes[2].imshow(rgb_gan_custom)
+    axes[2].set_title(f"Model 2: Custom GAN\nLoss: {loss_gan_custom}") 
     axes[2].axis('off')
-
-    axes[3].imshow(rgb_gan)
-    axes[3].set_title(f"GAN Generator\nVal Loss: {gan_loss}") 
+    
+    axes[3].imshow(rgb_gan_unet)
+    axes[3].set_title(f"Model 3: U-Net GAN\nLoss: {loss_gan_unet}") 
     axes[3].axis('off')
 
     plt.tight_layout()
@@ -203,4 +219,5 @@ def compare_models(image_path, output_path="model_comparison.jpg"):
     plt.show() 
 
 if __name__ == '__main__':
-    compare_models("Amir.jpg", "Amir_comparison.jpg")
+    # Make sure you have an image named Amir.jpg in your folder, or change this name!
+    compare_models("Amir.jpg", "comparison.jpg")
