@@ -55,7 +55,7 @@ We use two main metrics throughout the project.
 
 ## Model 1 — Baseline U-Net (`colorization.ipynb`)
 
-The first notebook establishes the baseline. A two-level U-Net (64 → 128 channels, 256 bottleneck) is trained with plain L1 loss on 4,000 COCO images. The optimizer is Adam with a learning rate of `1e-3`, no scheduling, no augmentation, 10 epochs.
+The first notebook establishes the baseline. A two-level U-Net (64 → 128 channels, 256 bottleneck) is trained with plain L1 loss on 8,000 COCO images. The optimizer is Adam with a learning rate of `1e-3`, no scheduling, no augmentation, 10 epochs.
 
 ```python
 class UNet(nn.Module):
